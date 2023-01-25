@@ -1,0 +1,28 @@
+name: n50
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=1_gnu
+  - libgcc-ng=11.2.0=h1d223b6_12
+  - libgomp=11.2.0=h1d223b6_12
+  - n50=1.4.2=pl5321hdfd78af_2
+  - perl=5.32.1=1_h7f98852_perl5
+  - perl-capture-tiny=0.48=pl5321hdfd78af_2
+  - perl-carp=1.38=pl5321hdfd78af_4
+  - perl-encode=3.16=pl5321h779adbc_0
+  - perl-exporter=5.72=pl5321hdfd78af_2
+  - perl-extutils-makemaker=7.64=pl5321hd8ed1ab_0
+  - perl-fastx-reader=1.3.0=pl5321hdfd78af_1
+  - perl-file-which=1.24=pl5321hd8ed1ab_0
+  - perl-getopt-long=2.52=pl5321hdfd78af_0
+  - perl-json-pp=4.07=pl5321hdfd78af_0
+  - perl-parent=0.236=pl5321hdfd78af_2
+  - perl-pod-escapes=1.07=pl5321hdfd78af_2
+  - perl-pod-usage=2.01=pl5321hdfd78af_0
+  - perl-test=1.26=pl5321hdfd78af_2
+  - perl-test-harness=3.42=pl5321hdfd78af_1
+  - perl-text-asciitable=0.22=pl5321hdfd78af_3
+prefix: /master/nplatt/anaconda3/envs/n50
