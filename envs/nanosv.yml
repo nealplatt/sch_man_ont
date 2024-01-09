@@ -1,0 +1,49 @@
+name: nanosv
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=2_gnu
+  - bzip2=1.0.8=hd590300_5
+  - c-ares=1.23.0=hd590300_0
+  - ca-certificates=2023.11.17=hbcca054_0
+  - certifi=2021.5.30=py36h5fab9bb_0
+  - htslib=1.17=h6bc39ce_1
+  - keyutils=1.6.1=h166bdaf_0
+  - krb5=1.20.1=hf9c8cef_0
+  - ld_impl_linux-64=2.40=h41732ed_0
+  - ldc=1.20.0=h9a1ace1_1
+  - libcurl=7.87.0=h6312ad2_0
+  - libdeflate=1.19=hd590300_0
+  - libedit=3.1.20191231=he28a2e2_2
+  - libev=4.33=hd590300_2
+  - libffi=3.4.2=h7f98852_5
+  - libgcc=7.2.0=h69d50b8_2
+  - libgcc-ng=13.2.0=h807b86a_3
+  - libgomp=13.2.0=h807b86a_3
+  - libnghttp2=1.52.0=ha637b67_1
+  - libnsl=2.0.1=hd590300_0
+  - libsqlite=3.44.2=h2797004_0
+  - libssh2=1.10.0=h37d81fd_2
+  - libstdcxx-ng=13.2.0=h7e041cc_3
+  - libzlib=1.2.13=hd590300_5
+  - nanosv=1.2.4=py_0
+  - ncurses=6.2=h58526e2_4
+  - openssl=1.1.1w=hd590300_0
+  - pip=20.0.2=py36_1
+  - pysam=0.8.3=py36haf49e46_9
+  - python=3.6.15=hb7a2778_0_cpython
+  - python_abi=3.6=2_cp36m
+  - pyvcf=0.6.8=py36_0
+  - readline=8.1=h46c0cb4_0
+  - sambamba=0.8.1=hadffe2f_1
+  - samtools=1.11=h6270b1f_0
+  - setuptools=49.6.0=py36h5fab9bb_3
+  - sqlite=3.37.0=h9cd32fc_0
+  - tk=8.6.13=noxft_h4845f30_101
+  - wheel=0.36.2=pyhd3deb0d_0
+  - xz=5.2.6=h166bdaf_0
+  - zlib=1.2.13=hd590300_5
+prefix: /master/nplatt/anaconda3/envs/nanosv
