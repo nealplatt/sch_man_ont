@@ -3,3 +3,7 @@ data/
 results/
 bin/
 nohup.out
+.snakemake/
+code/03-fst_from_svs.ipynb
+code/GRAVEYARD.ipynb
+code/old/

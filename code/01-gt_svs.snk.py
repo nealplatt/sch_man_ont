@@ -33,9 +33,8 @@ seq_dir     = "{}/raw_reads".format(results_dir)
 ref_genome = "{}/genome/SM_V10.fa".format(data_dir)
 
 #insert list of populations
-lab_pops =["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]
-callers = ["cutesv", "sniffles", "debreak"]
-#working on "nanovar", "mamnet" "svim",
+lab_pops = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]
+
 
 localrules: 
     all,
@@ -48,19 +47,20 @@ localrules:
 
 rule all:
     input:      
-        expand("{dir}/{lab_pop}.fastq",                         dir = seq_dir,     lab_pop = lab_pops),
+        expand("{dir}/{lab_pop}.fastq",                         dir = seq_dir,     lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
         f"{seq_dir}/n50_raw_reads.csv",
         f"{results_dir}/nanoq/n50_filtered_reads.csv",
         f"{results_dir}/mosdepth/covs.cvs",
-        expand("{dir}/nanoq/{lab_pop}.nanoq.fastq",             dir = results_dir, lab_pop = lab_pops),
-        expand("{dir}/minimap2/{lab_pop}.bam",                  dir = results_dir, lab_pop = lab_pops),
-        expand("{dir}/minimap2/{lab_pop}.flagstat.txt",         dir = results_dir, lab_pop = lab_pops),
-        expand("{dir}/mosdepth/{lab_pop}.mosdepth.summary.txt", dir = results_dir, lab_pop = lab_pops),
-        expand("{dir}/cutesv/{lab_pop}.cutesv.vcf",             dir = results_dir, lab_pop = lab_pops),
-
-        expand("{dir}/svjedi/{lab_pop}.jedi_genotype.vcf",   dir = results_dir, lab_pop = lab_pops),
-        #expand("{dir}/svjedi/{lab_pop}.jedi_genotype.tsv",   dir = results_dir, lab_pop = lab_pops),
-        #f"{results_dir}/svjedi/merged.jedi.tsv",
+        expand("{dir}/nanoq/{lab_pop}.nanoq.fastq",             dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        expand("{dir}/minimap2/{lab_pop}.bam",                  dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        expand("{dir}/minimap2/{lab_pop}.flagstats.txt",        dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        expand("{dir}/minimap2/{lab_pop}.stats.txt",            dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        expand("{dir}/mosdepth/{lab_pop}.mosdepth.summary.txt", dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        expand("{dir}/cutesv/{lab_pop}.cutesv.vcf",             dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        expand("{dir}/cutesv/{lab_pop}.cutesv.filtered.vcf",    dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        f"{results_dir}/survivor/survivor.vcf",
+        expand("{dir}/svjedi/{lab_pop}.jedi_genotype.vcf",      dir = results_dir, lab_pop = ["smbre", "smeg", "smle-pzq-er", "smle-pzq-es", "smor"]),
+        f"{results_dir}/svjedi/merged.jedi.tsv",
 
 
 rule n50_raw_reads:
@@ -94,8 +94,8 @@ rule nanoq:
     input:
         raw_fq = seq_dir + "/{lab_pop}.fastq"
     output:
-        nanoq_fq  = results_dir + "/nanoq/{lab_pop}.nanoq.fastq",
-        nanoq_txt = results_dir + "/nanoq/{lab_pop}.nanoq.txt"
+        nanoq_fq  = results_dir + "/nanoq/{lab_pop, sm.*\.}.nanoq.fastq",
+        nanoq_txt = results_dir + "/nanoq/{lab_pop, sm.*\.}.nanoq.txt"
     threads:
         1
     params:
@@ -104,7 +104,7 @@ rule nanoq:
         trim_start=25,
         trim_end=25
     log:
-        logs_dir + "/nanoq.{lab_pop}.log"
+        logs_dir + "/nanoq.{lab_pop, sm.*\.}.log"
     conda:
         envs_dir + "/nanoq.yml"
     shell:
@@ -152,7 +152,7 @@ rule minimap2:
         fq = results_dir + "/nanoq/{lab_pop}.nanoq.fastq",
         ref_fas = ref_genome
     output:
-        sam  = results_dir + "/minimap2/{lab_pop}.sam",
+        sam  = results_dir + "/minimap2/{lab_pop, sm.*\.}.sam",
     threads:
         48
     log:
@@ -170,15 +170,15 @@ rule minimap2:
             {input.fq}
         """
 #map reads
-rule flagstat:
+rule flagstats:
     input:
         sam = results_dir + "/minimap2/{lab_pop}.sam"
     output:
-        txt  = results_dir + "/minimap2/{lab_pop}.flagstat.txt"
+        txt  = results_dir + "/minimap2/{lab_pop, sm.*\.}.flagstats.txt"
     threads:
         1
     log:
-        logs_dir + "/flagstat.{lab_pop}.log"
+        logs_dir + "/flagstats.{lab_pop}.log"
     conda:
         envs_dir + "/samtools.yml"
     shell:
@@ -186,11 +186,27 @@ rule flagstat:
         samtools flagstat {input.sam} >{output.txt}
         """
 
+rule stats:
+    input:
+        sam = results_dir + "/minimap2/{lab_pop}.sam"
+    output:
+        txt  = results_dir + "/minimap2/{lab_pop, sm.*\.}.stats.txt"
+    threads:
+        1
+    log:
+        logs_dir + "/stats.{lab_pop}.log"
+    conda:
+        envs_dir + "/samtools.yml"
+    shell:
+        """
+        samtools stats {input.sam} >{output.txt}
+        """
+
 rule sort_bam:
     input:
         sam = results_dir + "/minimap2/{lab_pop}.sam"
     output:
-        bam  = results_dir + "/minimap2/{lab_pop}.bam"
+        bam  = results_dir + "/minimap2/{lab_pop, sm.*\.}.bam"
     threads:
         12
     params:
@@ -208,7 +224,7 @@ rule index_bam:
     input:
         bam = results_dir + "/minimap2/{lab_pop}.bam"
     output:
-        bai  = results_dir + "/minimap2/{lab_pop}.bam.bai"
+        bai  = results_dir + "/minimap2/{lab_pop, sm.*\.}.bam.bai"
     threads:
         1
     log:
@@ -225,10 +241,10 @@ rule mosdepth:
         bam = results_dir + "/minimap2/{lab_pop}.bam",
         bai = results_dir + "/minimap2/{lab_pop}.bam.bai"
     output:
-        dis = results_dir + "/mosdepth/{lab_pop}.mosdepth.global.dist.txt",
-        sum = results_dir + "/mosdepth/{lab_pop}.mosdepth.summary.txt",
-        bed = results_dir + "/mosdepth/{lab_pop}.per-base.bed.gz",
-        csi = results_dir + "/mosdepth/{lab_pop}.per-base.bed.gz.csi"
+        dis = results_dir + "/mosdepth/{lab_pop, sm.*\.}.mosdepth.global.dist.txt",
+        sum = results_dir + "/mosdepth/{lab_pop, sm.*\.}.mosdepth.summary.txt",
+        bed = results_dir + "/mosdepth/{lab_pop, sm.*\.}.per-base.bed.gz",
+        csi = results_dir + "/mosdepth/{lab_pop, sm.*\.}.per-base.bed.gz.csi"
     threads:
         4
     params:
@@ -287,7 +303,6 @@ rule cutesv:
         envs_dir + "/cutesv.yml"
     shell:
         """
-
         if [ -d {params.outdir} ]; then
             rm -rf {params.outdir}
         fi
@@ -310,97 +325,37 @@ rule cutesv:
             {input.bam} \
             {input.ref_fas} \
             {output.cutesv_vcf} \
-            {params.outdir}        
+            {params.outdir}
+
+        rm -r {params.outdir}
     """
 
-rule convert_cutesv_to_bed:
+rule filter_cutesv:
     input:
-        cutesv_vcf  = results_dir + "/cutesv/{lab_pop}.cutesv.vcf"
+        cutesv_vcf = results_dir + "/cutesv/{lab_pop}.cutesv.vcf"
     output:
-        cutesv_bed  = results_dir + "/cutesv/{lab_pop}.cutesv.bed"
+        filtered_vcf = results_dir + "/cutesv/{lab_pop}.cutesv.filtered.vcf",
     threads:
-        1
-    log:
-        logs_dir + "/convert_cutesv_to_bed.{lab_pop}.log"
-    conda:
-        envs_dir + "/bcftools.yml"
-    shell:
-        """
-        bcftools query --format "%CHROM\t%POS\t%END\t%ID\n" {input.cutesv_vcf} >{output.cutesv_bed}
-        """
-
-rule merge_and_clean_sv_bed:
-    input:
-        beds=expand("{dir}/cutesv/{lab_pop}.cutesv.bed", dir=results_dir, lab_pop=lab_pops),
-        ref_fai = ref_genome + ".fai"
-    output:
-        merged_bed = results_dir + "/uniq_svs/merged_svs_positions.bed",
-        filt_svs_bed  = results_dir + "/uniq_svs/filtered_svs_positions.bed"
+        4
     params:
-        merge_dist=501
-    threads:
-        1
+        min_q  = 10,
+        min_dp = 10,
     log:
-        logs_dir + "/merge_and_clean_sv_bed.log"
-    conda:
-        envs_dir + "/bedtools.yml"
-    shell:
-        """
-        cat {input.beds} | bedtools sort | bedtools slop -i - -g {input.ref_fai} -b {params.merge_dist} | bedtoolsmerge -d 1 >{output.merged_bed}
-        bedtools closest -d -io -a {output.merged_bed} -b {output.merged_bed} | awk '{{if ($7 > 1000) print $0}}' >{output.filt_svs_bed}
-        """
-
-rule subset_vcf:
-    input:
-        filt_svs_bed  = results_dir + "/uniq_svs/filtered_svs_positions.bed",
-        cutesv_vcf  = results_dir + "/cutesv/{lab_pop}.cutesv.vcf"
-    output:
-        cutesv_vcf = results_dir + "/uniq_svs/{lab_pop}.cutesv.uniq.recode.vcf"
-    params:
-        out_prefix = results_dir + "/uniq_svs/{lab_pop}.cutesv.uniq"
-    threads:
-        1
-    log:
-        logs_dir + "/subset_vcf.{lab_pop}.log"
+        logs_dir + "/filter_cutesv.{lab_pop}.log"
     conda:
         envs_dir + "/vcftools.yml"
     shell:
         """
-        vcftools --vcf {input.cutesv_vcf} --bed {input.filt_svs_bed} --recode --recode-INFO-all --out {params.out_prefix}
-        """
-
-rule prep_survivor:
-    input:
-        smbre_vcf        = results_dir + "/uniq_svs/smbre.cutesv.uniq.recode.vcf",
-        smor_vcf         = results_dir + "/uniq_svs/smor.cutesv.uniq.recode.vcf",
-        smle_pzq_er_vcf  = results_dir + "/uniq_svs/smle-pzq-er.cutesv.uniq.recode.vcf",
-        smle_pzq_es_vcf  = results_dir + "/uniq_svs/smle-pzq-es.cutesv.uniq.recode.vcf",
-        smeg_vcf         = results_dir + "/uniq_svs/smeg.cutesv.uniq.recode.vcf"
-    output:
-        vcf_list  = results_dir + "/survivor/pop_vcfs.list"
-    threads:
-        1
-    log:
-        logs_dir + "/prep_survivor.log"
-    shell:
-        """
-        echo {input.smbre_vcf}        >{output.vcf_list}
-        echo {input.smor_vcf}        >>{output.vcf_list}
-        echo {input.smle_pzq_er_vcf} >>{output.vcf_list}
-        echo {input.smle_pzq_es_vcf} >>{output.vcf_list}
-        echo {input.smeg_vcf}        >>{output.vcf_list}
+        vcftools --vcf {input.cutesv_vcf} --minQ {params.min_q} --minDP {params.min_dp} --remove-filtered-all --max-missing-count 0 --recode --recode-INFO-all --stdout >{output.filtered_vcf}
         """
 
 rule survivor:
     input:
-        smbre_vcf        = results_dir + "/uniq_svs/smbre.cutesv.uniq.recode.vcf",
-        smor_vcf         = results_dir + "/uniq_svs/smor.cutesv.uniq.recode.vcf",
-        smle_pzq_er_vcf  = results_dir + "/uniq_svs/smle-pzq-er.cutesv.uniq.recode.vcf",
-        smle_pzq_es_vcf  = results_dir + "/uniq_svs/smle-pzq-es.cutesv.uniq.recode.vcf",
-        smeg_vcf         = results_dir + "/uniq_svs/smeg.cutesv.uniq.recode.vcf",
-        vcf_list  = results_dir + "/survivor/pop_vcfs.list"
+        vcfs = expand(results_dir + "/cutesv/{lab_pop}.cutesv.filtered.vcf", lab_pop = lab_pops)
     output:
-        merged_vcf  = results_dir + "/survivor/survivor.vcf"
+        merged_vcf  = results_dir + "/survivor/survivor.vcf",
+        vcf_list  = results_dir + "/survivor/pop_vcfs.list",
+        survivor_dir = directory(results_dir + "/survivor")
     threads:
         12
     params:
@@ -416,9 +371,16 @@ rule survivor:
         envs_dir + "/survivor.yml"
     shell:
         """
+
+        if [ ! -d {output.survivor_dir} ]; then
+            mkdir -p {output.survivor_dir}
+        fi
+        
+        echo {input.vcfs} | sed 's/ /\\n/g' >{output.vcf_list}
+        
         SURVIVOR \
             merge \
-            {input.vcf_list} \
+            {output.vcf_list} \
             {params.max_distance_between_breakpoints} \
             {params.min_calls} \
             {params.sv_type} \
@@ -439,7 +401,7 @@ rule svjedi:
         48
     params:
         prefix=results_dir + "/svjedi/{lab_pop}.jedi",
-        min_support=5,
+        min_support=2,
     log:
         logs_dir + "/svjedi.{lab_pop}.log"
     conda:
@@ -455,86 +417,51 @@ rule svjedi:
             --minsupport {params.min_support} 
         """
 
-# rule svjedi_to_tsv:
-#     input:
-#         jedi_vcf  = results_dir + "/svjedi/{lab_pop}.jedi_genotype.vcf",
-#     output:
-#         jedi_tsv  = results_dir + "/svjedi/{lab_pop}.jedi_genotype.tsv",
-#     params:
-#         sample_id = "{lab_pop}"
-#     threads:
-#         1
-#     log:
-#         logs_dir + "/svjedi_to_tsv.{lab_pop}.log"
-#     conda:
-#         envs_dir + "/bcftools.yml"
-#     shell:
-#         """
-#         echo -e "chr\tpos\tid\tref\talt\tqual\tfilter\tsvlen\tsvtype\tchr2\tend\tcipos\tgt.{params.sample_id}\tdp.{params.sample_id}\tad.{params.sample_id}\tpl.{params.sample_id}" \
-#         > {output.jedi_tsv}
-#         bcftools query --format "%CHROM\t%POS\t%ID\t%REF\t%ALT\t%QUAL\t%FILTER\t%SVLEN\t%SVTYPE\t%CHR2\t%END\t%CIPOS\t[%GT\t%DP\t%AD\t%PL]\n" \
-#         {input.jedi_vcf} \
-#         >> {output.jedi_tsv}
-#         """
+rule svjedi_to_tsv:
+    input:
+        jedi_vcf  = results_dir + "/svjedi/{lab_pop}.jedi_genotype.vcf",
+    output:
+        jedi_tsv  = results_dir + "/svjedi/{lab_pop}.jedi_genotype.tsv",
+    params:
+        sample_id = "{lab_pop}"
+    threads:
+        1
+    log:
+        logs_dir + "/svjedi_to_tsv.{lab_pop}.log"
+    conda:
+        envs_dir + "/bcftools.yml"
+    shell:
+        """
+        echo -e "chr\tpos\tid\tref\talt\tqual\tfilter\tsvlen\tsvtype\tchr2\tend\tcipos\tgt.{params.sample_id}\tdp.{params.sample_id}\tad.{params.sample_id}\tpl.{params.sample_id}" \
+        > {output.jedi_tsv}
+        bcftools query --format "%CHROM\t%POS\t%ID\t%REF\t%ALT\t%QUAL\t%FILTER\t%SVLEN\t%SVTYPE\t%CHR2\t%END\t%CIPOS\t[%GT\t%DP\t%AD\t%PL]\n" \
+        {input.jedi_vcf} \
+        >> {output.jedi_tsv}
+        """
 
-# rule tsvs_to_merged_table:
-#     input:
-#         bre_jedi_tsv = results_dir + "/svjedi/smbre.jedi_genotype.tsv",
-#         eg_jedi_tsv  = results_dir + "/svjedi/smeg.jedi_genotype.tsv",
-#         er_jedi_tsv  = results_dir + "/svjedi/smle-pzq-er.jedi_genotype.tsv",
-#         es_jedi_tsv  = results_dir + "/svjedi/smle-pzq-es.jedi_genotype.tsv",
-#         or_jedi_tsv  = results_dir + "/svjedi/smor.jedi_genotype.tsv"
-#     output:
-#         merged_tsv  = results_dir + "/svjedi/merged.jedi.tsv",
-#     threads:
-#         1
-#     log:
-#         logs_dir + "/tsvs_to_merged_table.log"
-#     shell:
-#         """
-#         cat {input.bre_jedi_tsv} >bre.tmp
-#         cut -f13-16 {input.eg_jedi_tsv} >eg.tmp
-#         cut -f13-16 {input.er_jedi_tsv} >er.tmp
-#         cut -f13-16 {input.es_jedi_tsv} >es.tmp
-#         cut -f13-16 {input.or_jedi_tsv} >or.tmp
+rule tsvs_to_merged_table:
+    input:
+        bre_jedi_tsv = results_dir + "/svjedi/smbre.jedi_genotype.tsv",
+        eg_jedi_tsv  = results_dir + "/svjedi/smeg.jedi_genotype.tsv",
+        er_jedi_tsv  = results_dir + "/svjedi/smle-pzq-er.jedi_genotype.tsv",
+        es_jedi_tsv  = results_dir + "/svjedi/smle-pzq-es.jedi_genotype.tsv",
+        or_jedi_tsv  = results_dir + "/svjedi/smor.jedi_genotype.tsv"
+    output:
+        merged_tsv  = results_dir + "/svjedi/merged.jedi.tsv",
+    threads:
+        1
+    log:
+        logs_dir + "/tsvs_to_merged_table.log"
+    shell:
+        """
+        cat {input.bre_jedi_tsv} >bre.tmp
+        cut -f13-16 {input.eg_jedi_tsv} >eg.tmp
+        cut -f13-16 {input.er_jedi_tsv} >er.tmp
+        cut -f13-16 {input.es_jedi_tsv} >es.tmp
+        cut -f13-16 {input.or_jedi_tsv} >or.tmp
 
-#         paste bre.tmp eg.tmp er.tmp es.tmp or.tmp >{output.merged_tsv}
+        paste bre.tmp eg.tmp er.tmp es.tmp or.tmp >{output.merged_tsv}
 
-#         rm bre.tmp eg.tmp er.tmp es.tmp or.tmp
-#         """
-###########################################################################################################################
-
-
-# rule extract_exons_from_gtf:
-#     input:
-#         gtf  = data_dir + "/genome/SM_V10.gtf"
-#     output:
-#         exon_gtf  = results_dir + "/svs_in_genes/exons.gtf"
-#     threads:
-#         1
-#     log:
-#         logs_dir + "/extract_exons_from_gtf.log"
-#     conda:
-#         envs_dir + "/bcftools.yml"
-#     shell:
-#         """
-#         grep -i exon {input.gtf} >{output.exon_gtf}
-#         """
-
-# rule intersect_svs_vs_genes:
-#     input:
-#         bed  = results_dir + "/svs_in_genes/{lab_pop}.{caller}.bed",
-#         exon_gtf  = results_dir + "/svs_in_genes/exons.gtf"
-#     output:
-#         bed  = results_dir + "/svs_in_genes/{lab_pop}.{caller}.exons.bed",
-#     threads:
-#         1
-#     log:
-#         logs_dir + "/intersect_svs_vs_genes.{lab_pop}.{caller}.log"
-#     conda:
-#         envs_dir + "/bedtools.yml"
-#     shell:
-#         """
-#          bedtools intersect -a {input.bed} -b {input.exon_gtf} -u >{output.bed}
-#         """
+        rm bre.tmp eg.tmp er.tmp es.tmp or.tmp
+        """
 
