@@ -10,11 +10,11 @@ dependencies:
   - brotli-python=1.1.0=py310hc6cd4ac_1
   - bzip2=1.0.8=hd590300_5
   - c-ares=1.26.0=hd590300_0
-  - ca-certificates=2024.2.2=hbcca054_0
-  - certifi=2024.2.2=pyhd8ed1ab_0
+  - ca-certificates=2024.7.4=hbcca054_0
+  - certifi=2024.7.4=pyhd8ed1ab_0
   - charset-normalizer=3.3.2=pyhd8ed1ab_0
   - idna=3.6=pyhd8ed1ab_0
-  - igv-reports=1.11.0=pyh7cba7a3_0
+  - igv-reports=1.13.0=pyh7e72e81_0
   - intervaltree=3.1.0=pyhd8ed1ab_1
   - keyutils=1.6.1=h166bdaf_0
   - krb5=1.21.2=h659d440_0
@@ -35,7 +35,7 @@ dependencies:
   - libxcrypt=4.4.36=hd590300_1
   - libzlib=1.2.13=hd590300_5
   - ncurses=6.4=h59595ed_2
-  - openssl=3.2.1=hd590300_0
+  - openssl=3.3.1=h4bc722e_2
   - pip=24.0=pyhd8ed1ab_0
   - pysam=0.22.0=py310h41dec4a_0
   - pysocks=1.7.1=pyha2e5f31_6
