@@ -1,6 +1,8 @@
+[![DOI](https://zenodo.org/badge/201331948.svg)](https://doi.org/10.5281/zenodo.5590460)
+
 # Pooled long-read sequencing for structural variant characterization in schistosome populations
 
-##Shalini Nair (1), et al.
+## Shalini Nair (1), et al.
 
 1 Texas Biomedical Research Institute, San Antonio, Texas, USA
 
